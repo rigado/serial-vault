@@ -28,7 +28,8 @@ import (
 
 // MockDB holds the successful mocks for the database
 type MockDB struct {
-	encryptedAuthKeyHash string
+	encryptedAuthKeyHash      string
+	userAssertionLastRevision map[string]int
 }
 
 // CreateModelTable mock for the create model table method
@@ -873,6 +874,26 @@ func (mdb *MockDB) HealthCheck() error {
 	return nil
 }
 
+func (mdb *MockDB) CreateLastRevisionTable() error {
+	mdb.userAssertionLastRevision = make(map[string]int)
+	return nil
+}
+
+func (mdb *MockDB) GetLastRevision(modelId string, userEmail string) (int, error) {
+	key := fmt.Sprintf("%s-%s", modelId, userEmail)
+	lastRevision, ok := mdb.userAssertionLastRevision[key]
+	if !ok {
+		lastRevision = 1
+	}
+	return lastRevision, nil
+}
+
+func (mdb *MockDB) SaveLastRevision(modelId string, userEmail string, lastRevision int) error {
+	key := fmt.Sprintf("%s-%s", modelId, userEmail)
+	mdb.userAssertionLastRevision[key] = lastRevision
+	return nil
+}
+
 // -----------------------------------------------------------------------------
 
 // ErrorMockDB holds the unsuccessful mocks for the database
@@ -1383,4 +1404,16 @@ func (mdb *ErrorMockDB) UpdateAllowedTestLog(ID int, authorization User) error {
 // HealthCheck mock to simulate failed HealthCheck
 func (mdb *ErrorMockDB) HealthCheck() error {
 	return errors.New("Health check failed")
+}
+
+func (mdb *ErrorMockDB) CreateLastRevisionTable() error {
+	return errors.New("MOCK error creating last revision table")
+}
+
+func (mdb *ErrorMockDB) GetLastRevision(modelId string, userEmail string) (int, error) {
+	return 1, errors.New("MOCK error getting last revision")
+}
+
+func (mdb *ErrorMockDB) SaveLastRevision(modelId string, userEmail string, lastRevision int) error {
+	return errors.New("MOCK error saving last revision")
 }
