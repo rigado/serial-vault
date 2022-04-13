@@ -130,10 +130,22 @@ func userRequestToAssertion(user SystemUserRequest, model datastore.Model) map[s
 		until = since.Add(oneYearDuration)
 	}
 
+	lastRevision, err := datastore.Environ.DB.GetLastRevision(model.ID, user.Email)
+	if err != nil {
+		log.Message("USER", response.ErrorCreateSystemUserAssertion.Code, err.Error())
+		return map[string]interface{}{}
+	}
+	newRevision := lastRevision + 1
+	err = datastore.Environ.DB.SaveLastRevision(model.ID, user.Email, newRevision)
+	if err != nil {
+		log.Message("USER", response.ErrorCreateSystemUserAssertion.Code, err.Error())
+		return map[string]interface{}{}
+	}
+
 	// Create the serial assertion header from the serial-request headers
 	headers := map[string]interface{}{
 		"type":              asserts.SystemUserType.Name,
-		"revision":          userAssertionRevision,
+		"revision":          newRevision,
 		"authority-id":      model.AuthorityIDUser,
 		"brand-id":          model.AuthorityIDUser,
 		"email":             user.Email,

@@ -32,7 +32,6 @@ import (
 )
 
 const oneYearDuration = time.Duration(24*365) * time.Hour
-const userAssertionRevision = "1"
 
 // SystemUserRequest is the JSON version of the request to create a system-user assertion
 type SystemUserRequest struct {

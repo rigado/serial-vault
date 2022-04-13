@@ -146,6 +146,10 @@ type Datastore interface {
 	SyncListTestLogs() ([]TestLog, error)
 	SyncDeleteTestLog(ID int) error
 	UpdateAllowedTestLog(ID int, authorization User) error
+
+	CreateLastRevisionTable() error
+	GetLastRevision(int, string) (int, error)
+	SaveLastRevision(int, string, int) error
 }
 
 // DB local database interface with our custom methods.

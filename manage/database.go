@@ -127,6 +127,9 @@ func UpdateDatabase() {
 
 		// Create the testlog table, if it does not exist
 		{datastore.Environ.DB.CreateTestLogTable, create, "testlog", false},
+
+                // Create table to track user assertion's last revision
+                {datastore.Environ.DB.CreateLastRevisionTable, create, "last-revision", false},
 	}
 
 	exec(operations)
